@@ -221,6 +221,10 @@ vim.diagnostic.config({
 })
 
 -- [[ Basic Keymaps ]]
+--
+
+-- Reman q to escaoe instead of recording macro
+vim.keymap.set('n', 'q', '<Esc>', { silent = true })
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -235,6 +239,15 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>ew', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>el', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+-- Exit terminal mode with ctrl-[
+vim.keymap.set('t', '<C-[>', '<C-\\><C-n>', { silent = true })
+-- Add commands to jump from terminal mode to another splits
+vim.keymap.set('t', '<C-w>h', '<C-\\><C-n><C-w>h', { silent = true })
+vim.keymap.set('t', '<C-w>j', '<C-\\><C-n><C-w>j', { silent = true })
+vim.keymap.set('t', '<C-w>k', '<C-\\><C-n><C-w>k', { silent = true })
+vim.keymap.set('t', '<C-w>l', '<C-\\><C-n><C-w>l', { silent = true })
+
 
 -- Copilot keymaps
 vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
@@ -256,8 +269,11 @@ require('telescope').setup {
   defaults = {
     mappings = {
       i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
+        ['<C-h>'] = "which_key",
+        ['<C-d>'] = require('telescope.actions').delete_buffer
+      },
+      n = {
+        ['<C-d>'] = require('telescope.actions').delete_buffer
       },
     },
     borderchars = {
@@ -308,15 +324,15 @@ end
 vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
 -- See `:help telescope.builtin`
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
+vim.keymap.set('n', '<leader>bb', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
-vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
-  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
-    previewer = false,
-  })
-end, { desc = '[/] Fuzzily search in current buffer' })
+-- vim.keymap.set('n', '<leader>/', function()
+-- You can pass additional configuration to telescope to change theme, layout, etc.
+-- require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+--   winblend = 10,
+--   previewer = false,
+-- })
+-- end, { desc = '[/] Fuzzily search in Git Files' })
 
 local function telescope_live_grep_open_files()
   require('telescope.builtin').live_grep {
@@ -325,8 +341,10 @@ local function telescope_live_grep_open_files()
   }
 end
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
-vim.keymap.set('n', '<leader>ss', require('telescope.builtin').builtin, { desc = '[S]earch [S]elect Telescope' })
+vim.keymap.set('n', '<leader>:', require('telescope.builtin').command_history, { desc = 'Commands History' })
+vim.keymap.set('n', '<leader>;', require('telescope.builtin').commands, { desc = 'Commands' })
 vim.keymap.set('n', '<leader>sG', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>/', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
@@ -586,7 +604,7 @@ local view = require("iron.view")
 iron.setup {
   config = {
     -- Whether a repl should be discarded or not
-    scratch_repl = true,
+    scratch_repl = false,
     -- Your repl definitions come here
     repl_definition = {
       sh = {
@@ -603,7 +621,7 @@ iron.setup {
   -- Iron doesn't set keymaps by default anymore.
   -- You can set them here or manually add keymaps to the functions in iron.core
   keymaps = {
-    visual_send = "<leader>rv",
+    visual_send = "<leader>rr",
     send_file = "<leader>rf",
     send_line = "<leader>rr",
     cr = "<leader>r<cr>",
