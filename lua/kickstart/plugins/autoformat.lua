@@ -60,6 +60,15 @@ return {
               return
             end
 
+            -- format imports with ruff for python only
+            if client.name == 'ruff_lsp' then
+              vim.lsp.buf.code_action({
+                context = { only = { 'source.organizeImports' } },
+                apply = true,
+              })
+              vim.wait(70)
+            end
+
             vim.lsp.buf.format {
               async = false,
               filter = function(c)

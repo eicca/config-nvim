@@ -173,6 +173,11 @@ require('lazy').setup({
     config = true
   },
 
+  {
+    "tpope/vim-fugitive"
+  },
+
+
   require 'kickstart.plugins.autoformat',
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
@@ -218,6 +223,19 @@ vim.o.termguicolors = true
 -- Disabled virtual text in diagnostics
 vim.diagnostic.config({
   virtual_text = false,
+})
+
+
+-- Extend some filetypes
+vim.filetype.add({
+  filename = {
+    [".env"] = "config",
+    [".todo"] = "txt",
+  },
+  pattern = {
+    ["req.*.txt"] = "config",
+    ["gitconf.*"] = "gitconfig",
+  },
 })
 
 -- [[ Basic Keymaps ]]
@@ -503,6 +521,7 @@ local servers = {
   -- clangd = {},
   -- gopls = {},
   pyright = { filetypes = { 'python', 'py' } },
+  -- pylsp = { filetypes = { 'python', 'py' } },
   ruff_lsp = { filetypes = { 'python', 'py' } },
   rust_analyzer = {},
   -- tsserver = {},
@@ -654,9 +673,11 @@ require("neo-tree").setup({
 -- Open Neotree at the current file's directory
 vim.keymap.set('n', '<leader>fj', ":Neotree reveal filesystem current<cr>", { silent = true, desc = '[F]ile [J]ump' })
 
--- Set Neogit related shortcuts
 -- Open Neogit
 vim.keymap.set('n', '<leader>gs', require("neogit").open, { silent = true, desc = '[G]it [S]tatus' })
+-- Blame current file in a window mode
+vim.keymap.set('n', '<leader>gb', ":Git blame", { silent = true, desc = '[G]it [b]lame' })
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
