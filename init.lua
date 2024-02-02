@@ -664,7 +664,30 @@ vim.keymap.set('n', '<leader>rH', '<cmd>IronHide<cr>')
 
 -- [[ Configure Neotree ]]
 require("neo-tree").setup({
+  default_component_configs = {
+    name = {
+      use_git_status_colors = false,
+    },
+  },
   filesystem = {
+    filtered_items = {
+      hide_dotfiles = false,
+      hide_gitignored = false,
+      hide_by_name = {
+        ".git",
+        "node_modules",
+        ".cache",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".ipynb_checkpoints",
+        "TAGS",
+      },
+    },
+    follow_current_file = {
+      enabled = true,
+    },
     hijack_netrw_behavior = "open_current",
   }
 })
@@ -676,7 +699,19 @@ vim.keymap.set('n', '<leader>fj', ":Neotree reveal filesystem current<cr>", { si
 -- Open Neogit
 vim.keymap.set('n', '<leader>gs', require("neogit").open, { silent = true, desc = '[G]it [S]tatus' })
 -- Blame current file in a window mode
-vim.keymap.set('n', '<leader>gb', ":Git blame", { silent = true, desc = '[G]it [b]lame' })
+vim.keymap.set('n', '<leader>gb', ":Git blame<cr>", { silent = true, desc = '[G]it [b]lame' })
+
+-- Save current file
+vim.keymap.set('n', '<leader>fs', ":w<cr>", { silent = true, desc = '[F]ile [S]ave' })
+
+-- Split vertically
+vim.keymap.set('n', '<leader>wv', ":vsplit<cr>", { silent = true, desc = '[W]indow [V]ertical' })
+
+-- Split horizontally
+vim.keymap.set('n', '<leader>ws', ":split<cr>", { silent = true, desc = '[W]indow [S]plit' })
+
+-- Close current window
+vim.keymap.set('n', '<leader>wc', ":close<cr>", { silent = true, desc = '[W]indow [C]lose' })
 
 
 -- The line beneath this is called `modeline`. See `:help modeline`
