@@ -143,7 +143,30 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
-  "github/copilot.vim",
+  -- "github/copilot.vim",
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function()
+      require("copilot_cmp").setup()
+    end
+  },
+
+  {
+    "zbirenbaum/copilot.lua",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+        filetypes = {
+          markdown = true,
+          yaml = true,
+          gitcommit = true,
+          gitrebase = true,
+        },
+      })
+    end,
+  },
+
   "Vigemus/iron.nvim",
 
   {
@@ -175,6 +198,11 @@ require('lazy').setup({
 
   {
     "tpope/vim-fugitive"
+  },
+
+  {
+    'stevearc/conform.nvim',
+    opts = {},
   },
 
 
@@ -268,7 +296,8 @@ vim.keymap.set('t', '<C-w>l', '<C-\\><C-n><C-w>l', { silent = true })
 
 
 -- Copilot keymaps
-vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+-- vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -524,8 +553,9 @@ local servers = {
   -- pylsp = { filetypes = { 'python', 'py' } },
   ruff_lsp = { filetypes = { 'python', 'py' } },
   rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+  tsserver = {},
+  eslint = {},
+  prismals = {},
 
   lua_ls = {
     Lua = {
@@ -570,6 +600,7 @@ local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
 
+
 cmp.setup {
   snippet = {
     expand = function(args)
@@ -610,11 +641,28 @@ cmp.setup {
   },
   sources = {
     { name = 'nvim_lsp',               max_item_count = 10 },
+    { name = 'copilot' },
     { name = 'nvim_lsp_signature_help' },
     -- { name = 'luasnip' },
     { name = 'path' },
   },
 }
+
+-- [[ Configure autoformat ]]
+require("conform").setup({
+  formatters_by_ft = {
+    typescript = { "prettierd" },
+    typescriptreact = { "prettierd" },
+    javascript = { "prettierd" },
+    react = { "prettierd" },
+
+  },
+  format_on_save = {
+    -- These options will be passed to conform.format()
+    timeout_ms = 500,
+    lsp_fallback = false,
+  },
+})
 
 -- [[ Configure Iron.nvim ]]
 local iron = require("iron.core")
