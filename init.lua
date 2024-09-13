@@ -205,6 +205,41 @@ require('lazy').setup({
     opts = {},
   },
 
+  {
+    "jackMort/ChatGPT.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("chatgpt").setup({
+        -- this config assumes you have OPENAI_API_KEY environment variable set
+        openai_params = {
+          -- NOTE: model can be a function returning the model name
+          -- this is useful if you want to change the model on the fly
+          -- using commands
+          -- Example:
+          -- model = function()
+          --     if some_condition() then
+          --         return "gpt-4-1106-preview"
+          --     else
+          --         return "gpt-3.5-turbo"
+          --     end
+          -- end,
+          model = "gpt-4-1106-preview",
+          frequency_penalty = 0,
+          presence_penalty = 0,
+          max_tokens = 4095,
+          temperature = 0.2,
+          top_p = 0.1,
+          n = 1,
+        }
+      })
+    end,
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    }
+  },
+
 
   require 'kickstart.plugins.autoformat',
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
@@ -213,7 +248,6 @@ require('lazy').setup({
 }, {})
 
 vim.o.background = "dark" -- or "light" for light mode
--- vim.cmd([[colorscheme gruvbox-flat]])
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -309,6 +343,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+
+
+
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -516,22 +553,16 @@ local on_attach = function(_, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
+require('which-key').add({
   --   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
   --   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
+  { '<leader>g', group = '[G]it' },
   --   ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
   --   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+  { '<leader>s', group = '[S]earch' },
   --   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
   --   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-}
--- register which-key VISUAL mode
--- required for visual <leader>hs (hunk stage) to work
-require('which-key').register({
-  ['<leader>'] = { name = 'VISUAL <leader>' },
-  ['<leader>h'] = { 'Git [H]unk' },
-}, { mode = 'v' })
+})
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
@@ -551,11 +582,7 @@ local servers = {
   -- gopls = {},
   pyright = { filetypes = { 'python', 'py' } },
   -- pylsp = { filetypes = { 'python', 'py' } },
-  ruff_lsp = { filetypes = { 'python', 'py' } },
-  rust_analyzer = {},
-  tsserver = {},
-  eslint = {},
-  prismals = {},
+  ruff = { filetypes = { 'python', 'py' } },
 
   lua_ls = {
     Lua = {
