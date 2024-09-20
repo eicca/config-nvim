@@ -583,6 +583,7 @@ local servers = {
   pyright = { filetypes = { 'python', 'py' } },
   -- pylsp = { filetypes = { 'python', 'py' } },
   ruff = { filetypes = { 'python', 'py' } },
+  terraformls = {},
 
   lua_ls = {
     Lua = {
