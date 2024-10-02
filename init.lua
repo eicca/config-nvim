@@ -205,41 +205,7 @@ require('lazy').setup({
     opts = {},
   },
 
-  {
-    "jackMort/ChatGPT.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("chatgpt").setup({
-        -- this config assumes you have OPENAI_API_KEY environment variable set
-        openai_params = {
-          -- NOTE: model can be a function returning the model name
-          -- this is useful if you want to change the model on the fly
-          -- using commands
-          -- Example:
-          -- model = function()
-          --     if some_condition() then
-          --         return "gpt-4-1106-preview"
-          --     else
-          --         return "gpt-3.5-turbo"
-          --     end
-          -- end,
-          model = "gpt-4-1106-preview",
-          frequency_penalty = 0,
-          presence_penalty = 0,
-          max_tokens = 4095,
-          temperature = 0.2,
-          top_p = 0.1,
-          n = 1,
-        }
-      })
-    end,
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim"
-    }
-  },
-
+  'ojroques/vim-oscyank',
 
   require 'kickstart.plugins.autoformat',
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
@@ -678,13 +644,6 @@ cmp.setup {
 
 -- [[ Configure autoformat ]]
 require("conform").setup({
-  formatters_by_ft = {
-    typescript = { "prettierd" },
-    typescriptreact = { "prettierd" },
-    javascript = { "prettierd" },
-    react = { "prettierd" },
-
-  },
   format_on_save = {
     -- These options will be passed to conform.format()
     timeout_ms = 500,
@@ -792,3 +751,25 @@ vim.keymap.set('n', '<leader>wc', ":close<cr>", { silent = true, desc = '[W]indo
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+
+if not vim.fn.has('nvim') and not vim.fn.has('clipboard_working') then
+  -- In the event that the clipboard isn't working, it's quite likely that
+  -- the + and * registers will not be distinct from the unnamed register. In
+  -- this case, event.regname will always be '' (empty string). However, it
+  -- can be the case that `has('clipboard_working')` is false, yet `+` is
+  -- still distinct, so we want to check them all.
+  local VimOSCYankPostRegisters = { '', '+', '*' }
+
+  local function VimOSCYankPostCallback(event)
+    if event.operator == 'y' and vim.tbl_contains(VimOSCYankPostRegisters, event.regname) then
+      vim.fn.OSCYankRegister(event.regname)
+    end
+  end
+
+  vim.api.nvim_create_augroup('VimOSCYankPost', { clear = true })
+  vim.api.nvim_create_autocmd('TextYankPost', {
+    group = 'VimOSCYankPost',
+    callback = function() VimOSCYankPostCallback(vim.v.event) end
+  })
+end
