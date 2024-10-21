@@ -205,12 +205,17 @@ require('lazy').setup({
     opts = {},
   },
 
-  'ojroques/vim-oscyank',
 
-  require 'kickstart.plugins.autoformat',
-  --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
+
 }, {})
 
 vim.o.background = "dark" -- or "light" for light mode
@@ -513,9 +518,9 @@ local on_attach = function(_, bufnr)
   end, '[W]orkspace [L]ist Folders')
 
   -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, { desc = 'Format current buffer with LSP' })
+  --   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+  --     vim.lsp.buf.format()
+  --   end, { desc = 'Format current buffer with LSP' })
 end
 
 -- document existing key chains
@@ -644,10 +649,39 @@ cmp.setup {
 
 -- [[ Configure autoformat ]]
 require("conform").setup({
+  -- Map of filetype to formatters
+  formatters_by_ft = {
+    lua = { "stylua" },
+    -- Conform will run multiple formatters sequentially
+    -- go = { "goimports", "gofmt" },
+    -- You can also customize some of the format options for the filetype
+    -- rust = { "rustfmt", lsp_format = "fallback" },
+    -- You can use a function here to determine the formatters dynamically
+    python = function(bufnr)
+      if require("conform").get_formatter_info("ruff_format", bufnr).available then
+        return { "ruff_format" }
+      else
+        return { "isort", "black" }
+      end
+    end,
+    -- Use the "*" filetype to run formatters on all filetypes.
+    -- ["*"] = { "codespell" },
+    -- Use the "_" filetype to run formatters on filetypes that don't
+    -- have other formatters configured.
+    ["_"] = { "trim_whitespace" },
+  },
+  -- Set this to change the default values when calling conform.format()
+  -- This will also affect the default values for format_on_save/format_after_save
+  default_format_opts = {
+    lsp_format = "fallback",
+  },
+  -- If this is set, Conform will run the formatter on save.
+  -- It will pass the table to conform.format().
+  -- This can also be a function that returns the table.
   format_on_save = {
-    -- These options will be passed to conform.format()
+    -- I recommend these options. See :help conform.format for details.
+    lsp_format = "fallback",
     timeout_ms = 500,
-    lsp_fallback = false,
   },
 })
 
@@ -752,24 +786,3 @@ vim.keymap.set('n', '<leader>wc', ":close<cr>", { silent = true, desc = '[W]indo
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 
-
-if not vim.fn.has('nvim') and not vim.fn.has('clipboard_working') then
-  -- In the event that the clipboard isn't working, it's quite likely that
-  -- the + and * registers will not be distinct from the unnamed register. In
-  -- this case, event.regname will always be '' (empty string). However, it
-  -- can be the case that `has('clipboard_working')` is false, yet `+` is
-  -- still distinct, so we want to check them all.
-  local VimOSCYankPostRegisters = { '', '+', '*' }
-
-  local function VimOSCYankPostCallback(event)
-    if event.operator == 'y' and vim.tbl_contains(VimOSCYankPostRegisters, event.regname) then
-      vim.fn.OSCYankRegister(event.regname)
-    end
-  end
-
-  vim.api.nvim_create_augroup('VimOSCYankPost', { clear = true })
-  vim.api.nvim_create_autocmd('TextYankPost', {
-    group = 'VimOSCYankPost',
-    callback = function() VimOSCYankPostCallback(vim.v.event) end
-  })
-end
